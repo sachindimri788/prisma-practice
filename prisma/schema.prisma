@@ -1,0 +1,99 @@
+// schema.prisma
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              Int             @id @default(autoincrement())
+  club_user_id    Int?
+  employee_id     Int?
+  is_archived     Boolean         @default(false)
+  is_trashed      Boolean         @default(false)
+  trashed_on      DateTime?
+  trashed_by_id   Int?
+  avatar_url      String?
+  company_id      Int?
+  created_by_id   Int?
+  updated_by_id   Int?
+  first_name      String
+  last_name       String
+  email           String          @unique
+  password        String?
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+
+  userDetails     UserDetails[]   // Add opposite relation field
+  phoneNumbers    PhoneNumber[]   // Add opposite relation field
+  roleUsers       RoleUser[]      // Add opposite relation field
+  projectUsers    ProjectUser[]   // Add opposite relation field
+}
+
+model UserDetails {
+  id              Int             @id @default(autoincrement())
+  user_id         Int
+  office          Int
+  competency      Int
+  domain          String
+  designation     String
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  user            User            @relation(fields: [user_id], references: [id])
+}
+
+model PhoneNumber {
+  id              Int             @id @default(autoincrement())
+  user_id         Int
+  phone           Int
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  user            User            @relation(fields: [user_id], references: [id])
+}
+
+model Role {
+  id              Int             @id @default(autoincrement())
+  name            String
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  roleUsers       RoleUser[]      // Add opposite relation field
+}
+
+model RoleUser {
+  user_id         Int
+  role_id         Int
+  @@id([user_id, role_id])
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  user            User            @relation(fields: [user_id], references: [id])
+  role            Role            @relation(fields: [role_id], references: [id])
+}
+
+model Project {
+  id              Int             @id @default(autoincrement())
+  name            String
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  projectUsers    ProjectUser[]   // Add opposite relation field
+}
+
+model ProjectUser {
+  user_id         Int
+  project_id      Int
+  @@id([user_id, project_id])
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  user            User            @relation(fields: [user_id], references: [id])
+  project         Project         @relation(fields: [project_id], references: [id])
+}
